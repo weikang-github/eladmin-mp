@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.zhengjie.modules.forest.mapper.ForestResourceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="me.zhengjie.modules.forest.domain.ForestResource">
+        <id column="id" property="id"/>
+        <result column="forest_class_number" property="forestClassNumber"/>
+        <result column="sub_class_number" property="subClassNumber"/>
+        <result column="tree_species" property="treeSpecies"/>
+        <result column="area" property="area"/>
+        <result column="volume" property="volume"/>
+        <result column="geometry" property="geometry" jdbcType="OTHER" typeHandler="org.locationtech.jts.geom.GeometryTypeHandler"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, forest_class_number, sub_class_number, tree_species, area, volume, geometry, create_by, update_by, create_time, update_time
+    </sql>
+
+    <!-- 查询森林资源 -->
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM forest_resource
+        <where>
+            <if test="criteria.forestClassNumber != null and criteria.forestClassNumber != ''">
+                AND forest_class_number LIKE CONCAT('%', #{criteria.forestClassNumber}, '%')
+            </if>
+            <if test="criteria.subClassNumber != null and criteria.subClassNumber != ''">
+                AND sub_class_number LIKE CONCAT('%', #{criteria.subClassNumber}, '%')
+            </if>
+            <if test="criteria.treeSpecies != null and criteria.treeSpecies != ''">
+                AND tree_species LIKE CONCAT('%', #{criteria.treeSpecies}, '%')
+            </if>
+            <if test="criteria.minArea != null">
+                AND area >= #{criteria.minArea}
+            </if>
+            <if test="criteria.maxArea != null">
+                AND area <= #{criteria.maxArea}
+            </if>
+            <if test="criteria.minVolume != null">
+                AND volume >= #{criteria.minVolume}
+            </if>
+            <if test="criteria.maxVolume != null">
+                AND volume <= #{criteria.maxVolume}
+            </if>
+            <if test="criteria.bbox != null and criteria.bbox != ''">
+                AND ST_Within(geometry, ST_MakeEnvelope(#{criteria.bbox}, 4326))
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据地图视窗范围查询森林资源 -->
+    <select id="findByBbox" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM forest_resource
+        WHERE ST_Within(geometry, ST_MakeEnvelope(#{bbox}, 4326))
+    </select>
+
+</mapper>

@@ -1,0 +1,40 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] ELADMIN 后台管理                                                       [pom]
+[INFO] 公共模块                                                               [jar]
+[INFO] 日志模块                                                               [jar]
+[INFO] 工具模块                                                               [jar]
+[INFO] 核心模块                                                               [jar]
+[INFO] 代码生成模块                                                             [jar]
+[INFO] forest模块                                                           [jar]
+[INFO] main模块                                                             [jar]
+[INFO] 
+[INFO] ------------------------< me.zhengjie:eladmin >-------------------------
+[INFO] Building ELADMIN 后台管理 1.1                                          [1/8]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ eladmin ---
+[INFO] 
+[INFO] --- install:2.5.2:install (default-install) @ eladmin ---
+[INFO] Installing D:\traeProject\trae_04\eladmin-mp\eladmin\pom.xml to D:\apache\hebi\me\zhengjie\eladmin\1.1\eladmin-1.1.pom
+[INFO] 
+[INFO] ---------------------< me.zhengjie:eladmin-common >---------------------
+[INFO] Building 公共模块 1.1                                                  [2/8]
+[INFO]   from eladmin-common\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ eladmin-common ---
+[INFO] Deleting D:\traeProject\trae_04\eladmin-mp\eladmin\eladmin-common\target
+[INFO] 
+[INFO] --- resources:3.2.0:resources (default-resources) @ eladmin-common ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Using 'UTF-8' encoding to copy filtered properties files.
+[INFO] skip non existing resourceDirectory D:\traeProject\trae_04\eladmin-mp\eladmin\eladmin-common\src\main\resources
+[INFO] skip non existing resourceDirectory D:\traeProject\trae_04\eladmin-mp\eladmin\eladmin-common\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.10.1:compile (default-compile) @ eladmin-common ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 51 source files to D:\traeProject\trae_04\eladmin-mp\eladmin\eladmin-common\target\classes

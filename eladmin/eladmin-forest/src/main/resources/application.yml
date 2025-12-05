@@ -1,0 +1,33 @@
+# 数据库配置
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/forest
+    username: postgres
+    password: 123456
+
+# MyBatis-Plus配置
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: me.zhengjie.modules.forest.domain
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 服务器配置
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+# Swagger配置
+swagger:
+  title: 森林资源管理API
+  description: 森林资源管理系统的RESTful API文档
+  version: 1.0
+  base-package: me.zhengjie.modules.forest.rest
+
+# 日志配置
+logging:
+  level:
+    me.zhengjie.modules.forest: debug
