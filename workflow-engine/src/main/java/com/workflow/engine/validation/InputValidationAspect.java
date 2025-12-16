@@ -24,6 +24,12 @@ public class InputValidationAspect {
     @Autowired
     private WorkflowDefinitionValidator workflowDefinitionValidator;
     
+    @Autowired
+    private WorkflowExecutionValidator workflowExecutionValidator;
+    
+    @Autowired
+    private TaskExecutionValidator taskExecutionValidator;
+    
     /**
      * 验证工作流定义输入参数
      */
@@ -80,6 +86,42 @@ public class InputValidationAspect {
     }
     
     /**
+     * 验证工作流执行参数
+     */
+    @Before("execution(* com.workflow.engine.controller.WorkflowExecutionController.startWorkflow(..))")
+    public void validateWorkflowExecutionInput(JoinPoint joinPoint) {
+        logger.debug("Validating workflow execution input for method: {}", joinPoint.getSignature().getName());
+        
+        Object[] args = joinPoint.getArgs();
+        if (args.length >= 2) {
+            Long workflowDefinitionId = (Long) args[0];
+            Map<String, Object> inputParameters = (Map<String, Object>) args[1];
+            
+            workflowExecutionValidator.validateExecutionParameters(workflowDefinitionId, inputParameters);
+        }
+    }
+    
+    /**
+     * 验证任务执行参数
+     */
+    @Before("execution(* com.workflow.engine.controller.*Controller.*(..)) && args(taskExecution,..)")
+    public void validateTaskExecutionInput(JoinPoint joinPoint, com.workflow.engine.entity.TaskExecution taskExecution) {
+        logger.debug("Validating task execution input for method: {}", joinPoint.getSignature().getName());
+        
+        if (taskExecution != null) {
+            taskExecutionValidator.validateTaskExecution(taskExecution);
+            
+            if (taskExecution.getInputParameters() != null) {
+                taskExecutionValidator.validateInputParameters(taskExecution.getInputParameters());
+            }
+            
+            if (taskExecution.getOutput() != null) {
+                taskExecutionValidator.validateOutputData(taskExecution.getOutput());
+            }
+        }
+    }
+    
+    /**
      * 验证状态管理参数
      */
     @Before("execution(* com.workflow.engine.controller.WorkflowStateController.*(..))")
@@ -109,6 +151,12 @@ public class InputValidationAspect {
                     Object contextData = params.get("contextData");
                     if (contextData != null && !(contextData instanceof Map)) {
                         throw new WorkflowValidationException("上下文数据必须是Map类型");
+                    }
+                    
+                    if (contextData != null) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> contextMap = (Map<String, Object>) contextData;
+                        workflowExecutionValidator.validateContextData(contextMap);
                     }
                 }
             }
