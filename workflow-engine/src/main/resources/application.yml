@@ -1,0 +1,132 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: workflow-engine
+  
+  # 数据库配置
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/workflow_engine
+    username: postgres
+    password: postgres
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      auto-commit: false
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+  
+  # JPA配置
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 25
+          time_zone: UTC
+  
+  # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    database: 0
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
+  
+  # Jackson配置
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+    time-zone: UTC
+
+# MyBatis Plus配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    call-setters-on-nulls: true
+    jdbc-type-for-null: 'null'
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  mapper-locations: classpath*:/mapper/**/*.xml
+
+# 监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# 日志配置
+logging:
+  level:
+    com.workflow.engine: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId}] %logger{36} - %msg%n"
+  file:
+    name: logs/workflow-engine.log
+
+# 工作流引擎配置
+workflow:
+  engine:
+    # 任务执行线程池配置
+    executor:
+      core-pool-size: 10
+      max-pool-size: 50
+      queue-capacity: 1000
+      keep-alive-seconds: 60
+      thread-name-prefix: "Workflow-Executor-"
+    
+    # 任务超时配置
+    task:
+      default-timeout: 300000  # 5分钟
+      max-retries: 3
+      retry-backoff-multiplier: 2
+      retry-backoff-initial-delay: 1000  # 1秒
+    
+    # 流程执行配置
+    execution:
+      max-concurrent-executions: 100
+      cleanup-interval: 3600000  # 1小时
+      result-ttl: 86400000  # 24小时
+
+# 自定义配置
+app:
+  name: ${spring.application.name}
+  version: 1.0.0
+  description: 可视化工作流编排与执行引擎
