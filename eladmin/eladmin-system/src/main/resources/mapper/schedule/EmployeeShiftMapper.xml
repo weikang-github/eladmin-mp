@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.zhengjie.modules.schedule.mapper.EmployeeShiftMapper">
+
+    <resultMap id="BaseResultMap" type="me.zhengjie.modules.schedule.domain.EmployeeShift">
+        <id column="shift_id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="dept_id" property="deptId"/>
+        <result column="shift_date" property="shiftDate"/>
+        <result column="shift_type_id" property="shiftTypeId"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="status" property="status"/>
+        <result column="source" property="source"/>
+        <result column="rule_id" property="ruleId"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        
+        <association property="user" javaType="me.zhengjie.modules.system.domain.User">
+            <id column="user_id" property="id"/>
+            <result column="username" property="username"/>
+            <result column="nick_name" property="nickName"/>
+        </association>
+        
+        <association property="dept" javaType="me.zhengjie.modules.system.domain.Dept">
+            <id column="dept_id" property="id"/>
+            <result column="dept_name" property="name"/>
+        </association>
+        
+        <association property="shiftType" javaType="me.zhengjie.modules.schedule.domain.ShiftType">
+            <id column="shift_type_id" property="id"/>
+            <result column="type_name" property="name"/>
+            <result column="type_code" property="code"/>
+            <result column="color" property="color"/>
+            <result column="is_rest" property="isRest"/>
+        </association>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        es.shift_id, es.user_id, es.dept_id, es.shift_date, es.shift_type_id, 
+        es.start_time, es.end_time, es.status, es.source, es.rule_id, es.remark,
+        es.create_by, es.update_by, es.create_time, es.update_time,
+        u.username, u.nick_name, d.name as dept_name,
+        st.name as type_name, st.code as type_code, st.color, st.is_rest
+    </sql>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM schedule_employee_shift es
+        LEFT JOIN sys_user u ON es.user_id = u.user_id
+        LEFT JOIN sys_dept d ON es.dept_id = d.dept_id
+        LEFT JOIN schedule_shift_type st ON es.shift_type_id = st.shift_type_id
+        <where>
+            <if test="criteria.userId != null">
+                AND es.user_id = #{criteria.userId}
+            </if>
+            <if test="criteria.userIds != null and criteria.userIds.size() > 0">
+                AND es.user_id IN
+                <foreach collection="criteria.userIds" item="id" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="criteria.deptId != null">
+                AND es.dept_id = #{criteria.deptId}
+            </if>
+            <if test="criteria.startDate != null">
+                AND es.shift_date &gt;= #{criteria.startDate}
+            </if>
+            <if test="criteria.endDate != null">
+                AND es.shift_date &lt;= #{criteria.endDate}
+            </if>
+            <if test="criteria.shiftTypeId != null">
+                AND es.shift_type_id = #{criteria.shiftTypeId}
+            </if>
+            <if test="criteria.status != null and criteria.status != ''">
+                AND es.status = #{criteria.status}
+            </if>
+            <if test="criteria.source != null and criteria.source != ''">
+                AND es.source = #{criteria.source}
+            </if>
+        </where>
+        ORDER BY es.shift_date DESC, u.username
+    </select>
+
+    <select id="findByUserAndDateRange" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM schedule_employee_shift es
+        LEFT JOIN sys_user u ON es.user_id = u.user_id
+        LEFT JOIN sys_dept d ON es.dept_id = d.dept_id
+        LEFT JOIN schedule_shift_type st ON es.shift_type_id = st.shift_type_id
+        WHERE es.user_id = #{userId}
+        AND es.shift_date BETWEEN #{startDate} AND #{endDate}
+        ORDER BY es.shift_date
+    </select>
+
+    <select id="findByDeptAndDateRange" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM schedule_employee_shift es
+        LEFT JOIN sys_user u ON es.user_id = u.user_id
+        LEFT JOIN sys_dept d ON es.dept_id = d.dept_id
+        LEFT JOIN schedule_shift_type st ON es.shift_type_id = st.shift_type_id
+        WHERE es.dept_id = #{deptId}
+        AND es.shift_date BETWEEN #{startDate} AND #{endDate}
+        ORDER BY es.shift_date, u.username
+    </select>
+
+    <insert id="batchInsert">
+        INSERT INTO schedule_employee_shift
+        (user_id, dept_id, shift_date, shift_type_id, start_time, end_time, 
+         status, source, rule_id, remark, create_by, create_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.userId}, #{item.deptId}, #{item.shiftDate}, #{item.shiftTypeId}, 
+             #{item.startTime}, #{item.endTime}, #{item.status}, #{item.source}, 
+             #{item.ruleId}, #{item.remark}, #{item.createBy}, #{item.createTime})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByDateRange">
+        DELETE FROM schedule_employee_shift
+        WHERE user_id = #{userId}
+        AND shift_date BETWEEN #{startDate} AND #{endDate}
+    </delete>
+
+</mapper>
