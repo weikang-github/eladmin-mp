@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.zhengjie.modules.schedule.mapper.UserRuleMapper">
+    <resultMap id="BaseResultMap" type="me.zhengjie.modules.schedule.domain.UserRule">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="rule_id" property="ruleId"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="enabled" property="enabled"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <association property="username" javaType="String">
+            <result column="username" property="username"/>
+        </association>
+        <association property="ruleName" javaType="String">
+            <result column="rule_name" property="ruleName"/>
+        </association>
+    </resultMap>
+
+    <sql id="BaseResultMap">
+        ur.id, ur.user_id, ur.rule_id, ur.start_date, ur.end_date, ur.enabled, ur.create_by, ur.update_by, ur.create_time, ur.update_time
+    </sql>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select
+        <include refid="BaseResultMap"/>,
+        u.username, r.rule_name
+        from sch_user_rule ur
+        left join sys_user u on ur.user_id = u.user_id
+        left join sch_shift_rule r on ur.rule_id = r.rule_id
+        <where>
+            <if test="criteria.userId != null">
+                and ur.user_id = #{criteria.userId}
+            </if>
+            <if test="criteria.ruleId != null">
+                and ur.rule_id = #{criteria.ruleId}
+            </if>
+            <if test="criteria.enabled != null">
+                and ur.enabled = #{criteria.enabled}
+            </if>
+        </where>
+        order by ur.id
+    </select>
+
+    <select id="findEnabledByUserId" resultMap="BaseResultMap">
+        select
+        <include refid="BaseResultMap"/>,
+        u.username, r.rule_name,
+        r.rule_type, r.cycle_days
+        from sch_user_rule ur
+        left join sys_user u on ur.user_id = u.user_id
+        left join sch_shift_rule r on ur.rule_id = r.rule_id
+        where ur.user_id = #{userId}
+        and ur.enabled = 1
+        and r.enabled = 1
+        order by ur.start_date desc
+        limit 1
+    </select>
+
+    <insert id="batchInsert">
+        insert into sch_user_rule (user_id, rule_id, start_date, end_date, enabled, create_by, create_time, update_by, update_time)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.userId}, #{item.ruleId}, #{item.startDate}, #{item.endDate}, #{item.enabled}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime})
+        </foreach>
+    </insert>
+</mapper>

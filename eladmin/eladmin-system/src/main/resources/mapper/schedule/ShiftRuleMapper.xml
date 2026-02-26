@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.zhengjie.modules.schedule.mapper.ShiftRuleMapper">
+    <resultMap id="BaseResultMap" type="me.zhengjie.modules.schedule.domain.ShiftRule">
+        <id column="rule_id" property="id"/>
+        <result column="rule_name" property="ruleName"/>
+        <result column="rule_code" property="ruleCode"/>
+        <result column="rule_type" property="ruleType"/>
+        <result column="cycle_days" property="cycleDays"/>
+        <result column="dept_id" property="deptId"/>
+        <result column="enabled" property="enabled"/>
+        <result column="description" property="description"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <collection property="items" ofType="me.zhengjie.modules.schedule.domain.ShiftRuleItem">
+            <id column="item_id" property="id"/>
+            <result column="ir_rule_id" property="ruleId"/>
+            <result column="day_index" property="dayIndex"/>
+            <result column="i_shift_id" property="shiftId"/>
+            <association property="shift" javaType="me.zhengjie.modules.schedule.domain.Shift">
+                <id column="is_shift_id" property="id"/>
+                <result column="shift_name" property="shiftName"/>
+                <result column="shift_code" property="shiftCode"/>
+                <result column="shift_type" property="shiftType"/>
+            </association>
+        </collection>
+    </resultMap>
+
+    <sql id="BaseResultMap">
+        r.rule_id, r.rule_name, r.rule_code, r.rule_type, r.cycle_days, r.dept_id, r.enabled, r.description, r.create_by, r.update_by, r.create_time, r.update_time
+    </sql>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select
+        <include refid="BaseResultMap"/>
+        from sch_shift_rule r
+        <where>
+            <if test="criteria.enabled != null">
+                and r.enabled = #{criteria.enabled}
+            </if>
+            <if test="criteria.ruleType != null and criteria.ruleType != ''">
+                and r.rule_type = #{criteria.ruleType}
+            </if>
+            <if test="criteria.ruleName != null and criteria.ruleName != ''">
+                and r.rule_name like concat('%', #{criteria.ruleName}, '%')
+            </if>
+            <if test="criteria.deptId != null">
+                and r.dept_id = #{criteria.deptId}
+            </if>
+        </where>
+        order by r.rule_id
+    </select>
+
+    <select id="findWithItems" resultMap="BaseResultMap">
+        select
+        r.rule_id, r.rule_name, r.rule_code, r.rule_type, r.cycle_days, r.dept_id, r.enabled, r.description, r.create_by, r.update_by, r.create_time, r.update_time,
+        i.item_id, i.rule_id as ir_rule_id, i.day_index, i.shift_id as i_shift_id,
+        s.shift_id as is_shift_id, s.shift_name, s.shift_code, s.shift_type
+        from sch_shift_rule r
+        left join sch_shift_rule_item i on r.rule_id = i.rule_id
+        left join sch_shift s on i.shift_id = s.shift_id
+        where r.rule_id = #{id}
+        order by i.day_index
+    </select>
+
+    <select id="findByUserId" resultMap="BaseResultMap">
+        select distinct
+        <include refid="BaseResultMap"/>
+        from sch_shift_rule r
+        inner join sch_user_rule ur on r.rule_id = ur.rule_id
+        where ur.user_id = #{userId} and ur.enabled = 1 and r.enabled = 1
+        order by r.rule_id
+    </select>
+
+    <select id="findByDeptId" resultMap="BaseResultMap">
+        select
+        <include refid="BaseResultMap"/>
+        from sch_shift_rule r
+        where r.dept_id = #{deptId} and r.enabled = 1
+        order by r.rule_id
+    </select>
+</mapper>

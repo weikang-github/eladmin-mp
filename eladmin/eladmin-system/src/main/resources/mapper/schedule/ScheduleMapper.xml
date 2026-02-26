@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.zhengjie.modules.schedule.mapper.ScheduleMapper">
+    <resultMap id="BaseResultMap" type="me.zhengjie.modules.schedule.domain.Schedule">
+        <id column="schedule_id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="dept_id" property="deptId"/>
+        <result column="shift_id" property="shiftId"/>
+        <result column="schedule_date" property="scheduleDate"/>
+        <result column="schedule_type" property="scheduleType"/>
+        <result column="is_locked" property="isLocked"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <association property="shift" javaType="me.zhengjie.modules.schedule.domain.Shift">
+            <id column="s_shift_id" property="id"/>
+            <result column="s_shift_name" property="shiftName"/>
+            <result column="s_shift_code" property="shiftCode"/>
+            <result column="s_shift_type" property="shiftType"/>
+            <result column="s_start_time" property="startTime"/>
+            <result column="s_end_time" property="endTime"/>
+            <result column="s_color" property="color"/>
+        </association>
+        <association property="user" javaType="me.zhengjie.modules.system.domain.User">
+            <id column="u_user_id" property="id"/>
+            <result column="u_username" property="username"/>
+            <result column="u_nick_name" property="nickName"/>
+            <result column="u_phone" property="phone"/>
+        </association>
+        <association property="dept" javaType="me.zhengjie.modules.system.domain.Dept">
+            <id column="d_dept_id" property="id"/>
+            <result column="d_name" property="name"/>
+        </association>
+    </resultMap>
+
+    <sql id="BaseResultMap">
+        s.schedule_id, s.user_id, s.dept_id, s.shift_id, s.schedule_date, s.schedule_type, s.is_locked, s.remark, s.create_by, s.update_by, s.create_time, s.update_time
+    </sql>
+
+    <sql id="ShiftResultMap">
+        sh.shift_id as s_shift_id, sh.shift_name as s_shift_name, sh.shift_code as s_shift_code, sh.shift_type as s_shift_type, sh.start_time as s_start_time, sh.end_time as s_end_time, sh.color as s_color
+    </sql>
+
+    <sql id="UserResultMap">
+        u.user_id as u_user_id, u.username as u_username, u.nick_name as u_nick_name, u.phone as u_phone
+    </sql>
+
+    <sql id="DeptResultMap">
+        d.dept_id as d_dept_id, d.name as d_name
+    </sql>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select
+        <include refid="BaseResultMap"/>,
+        <include refid="ShiftResultMap"/>,
+        <include refid="UserResultMap"/>,
+        <include refid="DeptResultMap"/>
+        from sch_schedule s
+        left join sch_shift sh on s.shift_id = sh.shift_id
+        left join sys_user u on s.user_id = u.user_id
+        left join sys_dept d on s.dept_id = d.dept_id
+        <where>
+            <if test="criteria.userId != null">
+                and s.user_id = #{criteria.userId}
+            </if>
+            <if test="criteria.deptId != null">
+                and s.dept_id = #{criteria.deptId}
+            </if>
+            <if test="criteria.shiftId != null">
+                and s.shift_id = #{criteria.shiftId}
+            </if>
+            <if test="criteria.scheduleDate != null and criteria.scheduleDate.size() == 2">
+                and s.schedule_date between #{criteria.scheduleDate[0]} and #{criteria.scheduleDate[1]}
+            </if>
+            <if test="criteria.isLocked != null">
+                and s.is_locked = #{criteria.isLocked}
+            </if>
+        </where>
+        order by s.schedule_date desc, s.create_time desc
+    </select>
+
+    <select id="findByUserIdAndDateRange" resultMap="BaseResultMap">
+        select
+        <include refid="BaseResultMap"/>,
+        <include refid="ShiftResultMap"/>,
+        <include refid="UserResultMap"/>,
+        <include refid="DeptResultMap"/>
+        from sch_schedule s
+        left join sch_shift sh on s.shift_id = sh.shift_id
+        left join sys_user u on s.user_id = u.user_id
+        left join sys_dept d on s.dept_id = d.dept_id
+        where s.user_id = #{userId}
+        and s.schedule_date between #{startDate} and #{endDate}
+        order by s.schedule_date
+    </select>
+
+    <select id="findByDeptIdAndDateRange" resultMap="BaseResultMap">
+        select
+        <include refid="BaseResultMap"/>,
+        <include refid="ShiftResultMap"/>,
+        <include refid="UserResultMap"/>,
+        <include refid="DeptResultMap"/>
+        from sch_schedule s
+        left join sch_shift sh on s.shift_id = sh.shift_id
+        left join sys_user u on s.user_id = u.user_id
+        left join sys_dept d on s.dept_id = d.dept_id
+        where s.dept_id = #{deptId}
+        and s.schedule_date between #{startDate} and #{endDate}
+        order by s.schedule_date, u.username
+    </select>
+
+    <insert id="batchInsert">
+        insert into sch_schedule (user_id, dept_id, shift_id, schedule_date, schedule_type, is_locked, remark, create_by, create_time, update_by, update_time)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.userId}, #{item.deptId}, #{item.shiftId}, #{item.scheduleDate}, #{item.scheduleType}, #{item.isLocked}, #{item.remark}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime})
+        </foreach>
+    </insert>
+
+    <update id="batchUpdate">
+        <foreach collection="list" item="item" separator=";">
+            update sch_schedule
+            <set>
+                <if test="item.shiftId != null">shift_id = #{item.shiftId},</if>
+                <if test="item.scheduleType != null">schedule_type = #{item.scheduleType},</if>
+                <if test="item.isLocked != null">is_locked = #{item.isLocked},</if>
+                <if test="item.remark != null">remark = #{item.remark},</if>
+                update_by = #{item.updateBy},
+                update_time = #{item.updateTime}
+            </set>
+            where schedule_id = #{item.id}
+        </foreach>
+    </update>
+
+    <delete id="deleteByDateRange">
+        delete from sch_schedule
+        where schedule_date between #{startDate} and #{endDate}
+        <if test="excludeLocked == true">
+            and is_locked = 0
+        </if>
+    </delete>
+</mapper>

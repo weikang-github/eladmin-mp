@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.zhengjie.modules.schedule.mapper.ShiftMapper">
+    <resultMap id="BaseResultMap" type="me.zhengjie.modules.schedule.domain.Shift">
+        <id column="shift_id" property="id"/>
+        <result column="shift_name" property="shiftName"/>
+        <result column="shift_code" property="shiftCode"/>
+        <result column="shift_type" property="shiftType"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="break_duration" property="breakDuration"/>
+        <result column="color" property="color"/>
+        <result column="enabled" property="enabled"/>
+        <result column="description" property="description"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="BaseResultMap">
+        shift_id, shift_name, shift_code, shift_type, start_time, end_time, break_duration, color, enabled, description, create_by, update_by, create_time, update_time
+    </sql>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select
+        <include refid="BaseResultMap"/>
+        from sch_shift
+        <where>
+            <if test="criteria.enabled != null">
+                and enabled = #{criteria.enabled}
+            </if>
+            <if test="criteria.shiftType != null and criteria.shiftType != ''">
+                and shift_type = #{criteria.shiftType}
+            </if>
+            <if test="criteria.shiftName != null and criteria.shiftName != ''">
+                and shift_name like concat('%', #{criteria.shiftName}, '%')
+            </if>
+        </where>
+        order by shift_id
+    </select>
+</mapper>
