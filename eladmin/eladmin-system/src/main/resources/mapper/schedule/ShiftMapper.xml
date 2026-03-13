@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.zhengjie.modules.schedule.mapper.ShiftMapper">
+    <resultMap id="BaseResultMap" type="me.zhengjie.modules.schedule.domain.Shift">
+        <id column="shift_id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="type" property="type"/>
+        <result column="is_cross_day" property="isCrossDay"/>
+        <result column="break_start_time" property="breakStartTime"/>
+        <result column="break_end_time" property="breakEndTime"/>
+        <result column="color" property="color"/>
+        <result column="enabled" property="enabled"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        s.shift_id, s.name, s.code, s.start_time, s.end_time,
+        s.type, s.is_cross_day, s.break_start_time, s.break_end_time,
+        s.color, s.enabled, s.remark,
+        s.create_by, s.update_by, s.create_time, s.update_time
+    </sql>
+
+    <sql id="Where_Sql">
+        <where>
+            <if test="criteria.id != null">
+                and s.shift_id = #{criteria.id}
+            </if>
+            <if test="criteria.type != null and criteria.type != ''">
+                and s.type = #{criteria.type}
+            </if>
+            <if test="criteria.enabled != null">
+                and s.enabled = #{criteria.enabled}
+            </if>
+            <if test="criteria.blurry != null and criteria.blurry != ''">
+                and (
+                s.name like concat('%', #{criteria.blurry}, '%')
+                or s.code like concat('%', #{criteria.blurry}, '%')
+                )
+            </if>
+            <if test="criteria.createTime != null and criteria.createTime.size() == 2">
+                and s.create_time between #{criteria.createTime[0]} and #{criteria.createTime[1]}
+            </if>
+        </where>
+    </sql>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sch_shift s
+        <include refid="Where_Sql"/>
+        order by s.shift_id desc
+        <if test="criteria.size != null">
+            limit #{criteria.offset}, #{criteria.size}
+        </if>
+    </select>
+
+    <select id="countAll" resultType="java.lang.Long">
+        select count(*)
+        from sch_shift s
+        <include refid="Where_Sql"/>
+    </select>
+
+    <select id="findByCode" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sch_shift s
+        where s.code = #{code}
+    </select>
+
+    <select id="findByType" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sch_shift s
+        where s.type = #{type} and s.enabled = 1
+        order by s.shift_id
+    </select>
+
+    <select id="findByEnabled" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sch_shift s
+        where s.enabled = #{enabled}
+        order by s.shift_id
+    </select>
+</mapper>

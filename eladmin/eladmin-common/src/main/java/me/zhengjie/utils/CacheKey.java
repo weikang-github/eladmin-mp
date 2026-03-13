@@ -63,4 +63,12 @@ public interface CacheKey {
      * 数据字典
      */
     String DICT_NAME = "dict::name:";
+
+    /**
+     * 排班管理
+     */
+    String SHIFT_ID = "shift::id:";
+    String SHIFT_ROTATION_ID = "shiftRotation::id:";
+    String SCHEDULE_ID = "schedule::id:";
+    String SCHEDULE_RULE_ID = "scheduleRule::id:";
 }

@@ -1,0 +1,20 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< me.zhengjie:eladmin-system >---------------------
+[INFO] Building 核心模块 1.1
+[INFO] --------------------------------[ jar ]---------------------------------
+Downloading from nexusmy: http://192.168.167.177:8081/repository/maven-public/me/zhengjie/eladmin-tools/1.1/eladmin-tools-1.1.pom
+[WARNING] Failed to create parent directories for tracking file C:\apache\repository\me\zhengjie\eladmin-tools\1.1\eladmin-tools-1.1.pom.lastUpdated
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  15.792 s
+[INFO] Finished at: 2026-03-13T10:53:57+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal on project eladmin-system: Could not resolve dependencies for project me.zhengjie:eladmin-system:jar:1.1: Failed to collect dependencies at me.zhengjie:eladmin-tools:jar:1.1: Failed to read artifact descriptor for me.zhengjie:eladmin-tools:jar:1.1: Could not transfer artifact me.zhengjie:eladmin-tools:pom:1.1 from/to nexusmy (http://192.168.167.177:8081/repository/maven-public/): C:\apache\repository\me\zhengjie\eladmin-tools\1.1\eladmin-tools-1.1.pom.part.lock (系统找不到指定的路径。) -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/DependencyResolutionException

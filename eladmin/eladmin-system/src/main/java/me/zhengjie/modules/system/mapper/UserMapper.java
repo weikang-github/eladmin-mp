@@ -65,4 +65,15 @@ public interface UserMapper extends BaseMapper<User> {
     int countByRoles(@Param("roleIds") Set<Long> roleIds);
 
     void resetPwd(@Param("userIds") Set<Long> userIds, @Param("pwd") String pwd);
+
+    /**
+     * 根据部门ID列表查询用户ID列表
+     * @param deptIds 部门ID集合
+     * @return 用户ID列表
+     */
+    @Select("<script>" +
+            "SELECT user_id FROM sys_user WHERE dept_id IN " +
+            "<foreach collection='deptIds' item='id' open='(' separator=',' close=')'>#{id}</foreach>" +
+            "</script>")
+    List<Long> findUserIdsByDeptIds(@Param("deptIds") Set<Long> deptIds);
 }
