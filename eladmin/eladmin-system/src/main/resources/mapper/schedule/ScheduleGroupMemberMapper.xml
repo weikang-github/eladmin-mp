@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.zhengjie.modules.schedule.mapper.ScheduleGroupMemberMapper">
+
+    <resultMap id="ScheduleGroupMemberResultMap" type="me.zhengjie.modules.schedule.domain.ScheduleGroupMember">
+        <id column="id" property="id"/>
+        <result column="group_id" property="groupId"/>
+        <result column="user_id" property="userId"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="findByGroupId" resultMap="ScheduleGroupMemberResultMap">
+        SELECT m.* FROM schedule_group_member m
+        WHERE m.group_id = #{groupId}
+    </select>
+
+    <insert id="batchInsert">
+        INSERT INTO schedule_group_member (group_id, user_id, create_by, create_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.groupId}, #{item.userId}, #{item.createBy}, #{item.createTime})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByGroupIdAndUserIds">
+        DELETE FROM schedule_group_member
+        WHERE group_id = #{groupId}
+          AND user_id IN
+        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteByGroupId">
+        DELETE FROM schedule_group_member
+        WHERE group_id = #{groupId}
+    </delete>
+
+</mapper>
