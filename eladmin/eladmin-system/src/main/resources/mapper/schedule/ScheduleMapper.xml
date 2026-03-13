@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.zhengjie.modules.schedule.mapper.ScheduleMapper">
+    <resultMap id="BaseResultMap" type="me.zhengjie.modules.schedule.domain.Schedule">
+        <id column="schedule_id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="dept_id" property="deptId"/>
+        <result column="shift_id" property="shiftId"/>
+        <result column="schedule_date" property="scheduleDate"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="status" property="status"/>
+        <result column="source_type" property="sourceType"/>
+        <result column="conflict_flag" property="conflictFlag"/>
+        <result column="conflict_msg" property="conflictMsg"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <association property="user" javaType="me.zhengjie.modules.system.domain.User">
+            <id column="user_id" property="id"/>
+            <result column="user_username" property="username"/>
+            <result column="user_nick_name" property="nickName"/>
+        </association>
+        <association property="dept" javaType="me.zhengjie.modules.system.domain.Dept">
+            <id column="dept_id" property="id"/>
+            <result column="dept_name" property="name"/>
+        </association>
+        <association property="shift" javaType="me.zhengjie.modules.schedule.domain.Shift">
+            <id column="shift_id" property="id"/>
+            <result column="shift_name" property="name"/>
+            <result column="shift_code" property="code"/>
+            <result column="shift_start_time" property="startTime"/>
+            <result column="shift_end_time" property="endTime"/>
+            <result column="shift_color" property="color"/>
+        </association>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        sc.schedule_id, sc.user_id, sc.dept_id, sc.shift_id, sc.schedule_date,
+        sc.start_time, sc.end_time, sc.status, sc.source_type,
+        sc.conflict_flag, sc.conflict_msg, sc.remark, sc.create_by, sc.update_by,
+        sc.create_time, sc.update_time
+    </sql>
+
+    <sql id="User_Column_List">
+        u.user_id as user_id, u.username as user_username, u.nick_name as user_nick_name
+    </sql>
+
+    <sql id="Dept_Column_List">
+        d.dept_id as dept_id, d.name as dept_name
+    </sql>
+
+    <sql id="Shift_Column_List">
+        sh.shift_id as shift_id, sh.name as shift_name, sh.code as shift_code,
+        sh.start_time as shift_start_time, sh.end_time as shift_end_time, sh.color as shift_color
+    </sql>
+
+    <sql id="Where_Sql">
+        <where>
+            <if test="criteria.id != null">
+                and sc.schedule_id = #{criteria.id}
+            </if>
+            <if test="criteria.userId != null">
+                and sc.user_id = #{criteria.userId}
+            </if>
+            <if test="criteria.userIds != null and criteria.userIds.size() > 0">
+                and sc.user_id in
+                <foreach collection="criteria.userIds" item="userId" open="(" separator="," close=")">
+                    #{userId}
+                </foreach>
+            </if>
+            <if test="criteria.deptId != null">
+                and sc.dept_id = #{criteria.deptId}
+            </if>
+            <if test="criteria.deptIds != null and criteria.deptIds.size() > 0">
+                and sc.dept_id in
+                <foreach collection="criteria.deptIds" item="deptId" open="(" separator="," close=")">
+                    #{deptId}
+                </foreach>
+            </if>
+            <if test="criteria.shiftId != null">
+                and sc.shift_id = #{criteria.shiftId}
+            </if>
+            <if test="criteria.scheduleDate != null">
+                and sc.schedule_date = #{criteria.scheduleDate}
+            </if>
+            <if test="criteria.startDate != null">
+                and sc.schedule_date >= #{criteria.startDate}
+            </if>
+            <if test="criteria.endDate != null">
+                and sc.schedule_date <= #{criteria.endDate}
+            </if>
+            <if test="criteria.status != null and criteria.status != ''">
+                and sc.status = #{criteria.status}
+            </if>
+            <if test="criteria.sourceType != null and criteria.sourceType != ''">
+                and sc.source_type = #{criteria.sourceType}
+            </if>
+            <if test="criteria.conflictFlag != null">
+                and sc.conflict_flag = #{criteria.conflictFlag}
+            </if>
+            <if test="criteria.createTime != null and criteria.createTime.size() == 2">
+                and sc.create_time between #{criteria.createTime[0]} and #{criteria.createTime[1]}
+            </if>
+        </where>
+    </sql>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>,
+        <include refid="User_Column_List"/>,
+        <include refid="Dept_Column_List"/>,
+        <include refid="Shift_Column_List"/>
+        from (
+            select sc.*
+            from sch_schedule sc
+            <include refid="Where_Sql"/>
+            order by sc.schedule_date desc, sc.schedule_id desc
+            <if test="criteria.offset != null">
+                limit #{criteria.offset}, #{criteria.size}
+            </if>
+        ) sc
+        left join sys_user u on sc.user_id = u.user_id
+        left join sys_dept d on sc.dept_id = d.dept_id
+        left join sch_shift sh on sc.shift_id = sh.shift_id
+        order by sc.schedule_date desc, sc.schedule_id desc
+    </select>
+
+    <select id="countAll" resultType="java.lang.Long">
+        select count(*)
+        from sch_schedule sc
+        <include refid="Where_Sql"/>
+    </select>
+
+    <select id="findConflictSchedules" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>,
+        <include refid="Shift_Column_List"/>
+        from sch_schedule sc
+        left join sch_shift sh on sc.shift_id = sh.shift_id
+        where sc.user_id = #{userId} and sc.schedule_date = #{scheduleDate}
+        <if test="excludeScheduleId != null">
+            and sc.schedule_id != #{excludeScheduleId}
+        </if>
+    </select>
+
+    <select id="findByUserIdAndDateRange" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>,
+        <include refid="Shift_Column_List"/>
+        from sch_schedule sc
+        left join sch_shift sh on sc.shift_id = sh.shift_id
+        where sc.user_id = #{userId}
+        and sc.schedule_date between #{startDate} and #{endDate}
+        order by sc.schedule_date asc
+    </select>
+
+    <select id="findByUserIdsAndDateRange" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>,
+        <include refid="User_Column_List"/>,
+        <include refid="Shift_Column_List"/>
+        from sch_schedule sc
+        left join sys_user u on sc.user_id = u.user_id
+        left join sch_shift sh on sc.shift_id = sh.shift_id
+        where sc.user_id in
+        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+        and sc.schedule_date between #{startDate} and #{endDate}
+        order by sc.schedule_date asc, sc.user_id asc
+    </select>
+
+    <insert id="batchInsert">
+        insert into sch_schedule (user_id, dept_id, shift_id, schedule_date, status, 
+        source_type, conflict_flag, conflict_msg, remark, create_by, create_time)
+        values
+        <foreach collection="schedules" item="item" separator=",">
+            (#{item.userId}, #{item.deptId}, #{item.shiftId}, #{item.scheduleDate}, #{item.status},
+            #{item.sourceType}, #{item.conflictFlag}, #{item.conflictMsg}, #{item.remark},
+            #{item.createBy}, #{item.createTime})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByUserIdAndDateRange">
+        delete from sch_schedule 
+        where user_id = #{userId}
+        and schedule_date between #{startDate} and #{endDate}
+    </delete>
+</mapper>
