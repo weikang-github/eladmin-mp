@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.zhengjie.modules.schedule.mapper.ScheduleConflictMapper">
+
+    <resultMap id="ScheduleConflictResultMap" type="me.zhengjie.modules.schedule.domain.ScheduleConflict">
+        <id column="conflict_id" property="conflictId"/>
+        <result column="schedule_id" property="scheduleId"/>
+        <result column="conflict_type" property="conflictType"/>
+        <result column="conflict_description" property="conflictDescription"/>
+        <result column="resolved" property="resolved"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="ScheduleConflictResultMap">
+        SELECT c.* FROM schedule_conflict c
+        <where>
+            <if test="scheduleId != null">
+                AND c.schedule_id = #{scheduleId}
+            </if>
+            <if test="resolved != null">
+                AND c.resolved = #{resolved}
+            </if>
+        </where>
+        ORDER BY c.create_time DESC
+    </select>
+
+</mapper>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.zhengjie.modules.schedule.mapper.ScheduleGroupMapper">
+
+    <resultMap id="ScheduleGroupResultMap" type="me.zhengjie.modules.schedule.domain.ScheduleGroup">
+        <id column="group_id" property="groupId"/>
+        <result column="name" property="name"/>
+        <result column="dept_id" property="deptId"/>
+        <result column="rotation_rule_id" property="rotationRuleId"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="enabled" property="enabled"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="ScheduleGroupResultMap">
+        SELECT g.* FROM schedule_group g
+        <where>
+            <if test="name != null and name != ''">
+                AND g.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="deptId != null">
+                AND g.dept_id = #{deptId}
+            </if>
+            <if test="enabled != null">
+                AND g.enabled = #{enabled}
+            </if>
+        </where>
+        ORDER BY g.group_id ASC
+    </select>
+
+</mapper>
