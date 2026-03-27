@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.zhengjie.modules.attendance.mapper.AttendanceRecordMapper">
+    <resultMap id="BaseResultMap" type="me.zhengjie.modules.attendance.domain.AttendanceRecord">
+        <id column="record_id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="group_id" property="groupId"/>
+        <result column="attendance_date" property="attendanceDate"/>
+        <result column="check_in_time" property="checkInTime"/>
+        <result column="check_out_time" property="checkOutTime"/>
+        <result column="check_in_latitude" property="checkInLatitude"/>
+        <result column="check_in_longitude" property="checkInLongitude"/>
+        <result column="check_out_latitude" property="checkOutLatitude"/>
+        <result column="check_out_longitude" property="checkOutLongitude"/>
+        <result column="check_in_type" property="checkInType"/>
+        <result column="check_out_type" property="checkOutType"/>
+        <result column="check_in_status" property="checkInStatus"/>
+        <result column="check_out_status" property="checkOutStatus"/>
+        <result column="attendance_status" property="attendanceStatus"/>
+        <result column="check_in_wifi_name" property="checkInWifiName"/>
+        <result column="check_out_wifi_name" property="checkOutWifiName"/>
+        <result column="check_in_wifi_mac" property="checkInWifiMac"/>
+        <result column="check_out_wifi_mac" property="checkOutWifiMac"/>
+        <result column="device" property="device"/>
+        <result column="ip_address" property="ipAddress"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="BaseResultMap">
+        record_id, user_id, group_id, attendance_date, check_in_time, check_out_time, check_in_latitude, 
+        check_in_longitude, check_out_latitude, check_out_longitude, check_in_type, check_out_type, 
+        check_in_status, check_out_status, attendance_status, check_in_wifi_name, check_out_wifi_name, 
+        check_in_wifi_mac, check_out_wifi_mac, device, ip_address, remark, create_by, update_by, create_time, update_time
+    </sql>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select ar.*, u.username, d.name as dept_name
+        from attendance_record ar
+        left join sys_user u on ar.user_id = u.user_id
+        left join sys_dept d on u.dept_id = d.dept_id
+        <where>
+            <if test="criteria.userId != null">
+                and ar.user_id = #{criteria.userId}
+            </if>
+            <if test="criteria.groupId != null">
+                and ar.group_id = #{criteria.groupId}
+            </if>
+            <if test="criteria.attendanceStatus != null and criteria.attendanceStatus != ''">
+                and ar.attendance_status = #{criteria.attendanceStatus}
+            </if>
+            <if test="criteria.attendanceDate != null and criteria.attendanceDate.size() > 0">
+                and ar.attendance_date between #{criteria.attendanceDate[0]} and #{criteria.attendanceDate[1]}
+            </if>
+        </where>
+        order by ar.attendance_date desc, ar.create_time desc
+    </select>
+
+    <select id="findByUserAndDate" resultMap="BaseResultMap">
+        select
+        <include refid="BaseResultMap"/>
+        from attendance_record
+        where user_id = #{userId} and attendance_date = #{attendanceDate}
+    </select>
+
+    <select id="findByUserAndDateRange" resultMap="BaseResultMap">
+        select
+        <include refid="BaseResultMap"/>
+        from attendance_record
+        where user_id = #{userId} and attendance_date between #{startDate} and #{endDate}
+        order by attendance_date
+    </select>
+
+    <select id="findByDeptAndDateRange" resultMap="BaseResultMap">
+        select ar.*
+        from attendance_record ar
+        left join sys_user u on ar.user_id = u.user_id
+        where u.dept_id = #{deptId} and ar.attendance_date between #{startDate} and #{endDate}
+        order by ar.attendance_date, u.user_id
+    </select>
+</mapper>

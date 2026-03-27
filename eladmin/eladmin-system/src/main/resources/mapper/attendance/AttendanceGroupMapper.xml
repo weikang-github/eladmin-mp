@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.zhengjie.modules.attendance.mapper.AttendanceGroupMapper">
+    <resultMap id="BaseResultMap" type="me.zhengjie.modules.attendance.domain.AttendanceGroup">
+        <id column="group_id" property="id"/>
+        <result column="group_name" property="groupName"/>
+        <result column="company_latitude" property="companyLatitude"/>
+        <result column="company_longitude" property="companyLongitude"/>
+        <result column="allow_distance" property="allowDistance"/>
+        <result column="wifi_name" property="wifiName"/>
+        <result column="wifi_mac" property="wifiMac"/>
+        <result column="work_start_time" property="workStartTime"/>
+        <result column="work_end_time" property="workEndTime"/>
+        <result column="late_minutes" property="lateMinutes"/>
+        <result column="early_leave_minutes" property="earlyLeaveMinutes"/>
+        <result column="work_days" property="workDays"/>
+        <result column="enabled" property="enabled"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="BaseResultMap">
+        group_id, group_name, company_latitude, company_longitude, allow_distance, wifi_name, wifi_mac, 
+        work_start_time, work_end_time, late_minutes, early_leave_minutes, work_days, enabled, remark, 
+        create_by, update_by, create_time, update_time
+    </sql>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select
+        <include refid="BaseResultMap"/>
+        from attendance_group
+        <where>
+            <if test="criteria.groupName != null and criteria.groupName != ''">
+                and group_name like concat('%', #{criteria.groupName}, '%')
+            </if>
+            <if test="criteria.enabled != null">
+                and enabled = #{criteria.enabled}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="findByUserId" resultMap="BaseResultMap">
+        select distinct ag.*
+        from attendance_group ag
+        left join attendance_group_dept agd on ag.group_id = agd.group_id
+        left join sys_user u on u.dept_id = agd.dept_id
+        where u.user_id = #{userId} and ag.enabled = 1
+        limit 1
+    </select>
+
+    <select id="findByDeptId" resultMap="BaseResultMap">
+        select distinct ag.*
+        from attendance_group ag
+        left join attendance_group_dept agd on ag.group_id = agd.group_id
+        where agd.dept_id = #{deptId} and ag.enabled = 1
+    </select>
+</mapper>
