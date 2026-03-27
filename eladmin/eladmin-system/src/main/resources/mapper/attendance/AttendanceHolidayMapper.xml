@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.zhengjie.modules.attendance.mapper.AttendanceHolidayMapper">
+    <resultMap id="BaseResultMap" type="me.zhengjie.modules.attendance.domain.AttendanceHoliday">
+        <id column="holiday_id" property="id"/>
+        <result column="holiday_name" property="holidayName"/>
+        <result column="holiday_date" property="holidayDate"/>
+        <result column="holiday_type" property="holidayType"/>
+        <result column="year" property="year"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="BaseResultMap">
+        holiday_id, holiday_name, holiday_date, holiday_type, year, remark, create_by, update_by, create_time, update_time
+    </sql>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select
+        <include refid="BaseResultMap"/>
+        from attendance_holiday
+        <where>
+            <if test="criteria.holidayName != null and criteria.holidayName != ''">
+                and holiday_name like concat('%', #{criteria.holidayName}, '%')
+            </if>
+            <if test="criteria.year != null">
+                and year = #{criteria.year}
+            </if>
+            <if test="criteria.holidayType != null and criteria.holidayType != ''">
+                and holiday_type = #{criteria.holidayType}
+            </if>
+        </where>
+        order by holiday_date
+    </select>
+
+    <select id="findByDate" resultMap="BaseResultMap">
+        select
+        <include refid="BaseResultMap"/>
+        from attendance_holiday
+        where holiday_date = #{holidayDate}
+    </select>
+
+    <select id="findByYear" resultMap="BaseResultMap">
+        select
+        <include refid="BaseResultMap"/>
+        from attendance_holiday
+        where year = #{year}
+        order by holiday_date
+    </select>
+</mapper>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.zhengjie.modules.attendance.mapper.AttendanceGroupDeptMapper">
+    <resultMap id="BaseResultMap" type="me.zhengjie.modules.attendance.domain.AttendanceGroupDept">
+        <id column="id" property="id"/>
+        <result column="group_id" property="groupId"/>
+        <result column="dept_id" property="deptId"/>
+    </resultMap>
+
+    <sql id="BaseResultMap">
+        id, group_id, dept_id
+    </sql>
+
+    <delete id="deleteByGroupId">
+        delete from attendance_group_dept where group_id = #{groupId}
+    </delete>
+
+    <select id="findDeptIdsByGroupId" resultType="java.lang.Long">
+        select dept_id from attendance_group_dept where group_id = #{groupId}
+    </select>
+
+    <select id="findGroupIdsByDeptId" resultType="java.lang.Long">
+        select group_id from attendance_group_dept where dept_id = #{deptId}
+    </select>
+</mapper>
